@@ -1,0 +1,39 @@
+
+<html>
+<head>
+<style>
+body {
+	font-size: 12pt;
+	font-family: sans-serif;
+}
+
+.quote {
+	background-color: #ccc;
+	font-size: 200%;
+	font-weight: bold;
+}
+
+.attribution {
+	text-align: right;
+}
+</style>
+<title>Hands On Day 1</title>
+<script src="handson1.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/simple-statistics@7.7.0/dist/simple-statistics.min.js"></script>
+</head>
+
+<body>
+<div class="quote">"Although we often hear that data speak for themselves, their voices can be soft and sly."</div>
+<div class="attribution">Frederick Mosteller, Stephen E. Feinberg, and Robert E.R. Rourke, <i>Beginning Statistics with Data Analysis</i>, 1983.</div>
+
+
+<svg height="400px" width="600px" style="border: 1px solid blueviolet">
+    <circle id="togglecirle" cx="0" cy="0" r="50" stroke="blue" stroke-width="3" fill="black" onclick="console.log(toggleColor())"></circle>>
+    <circle cx="300" cy="200" r="200" stroke="blue" stroke-width="3" fill="yellow"></circle>>
+    <rect id="random_square" x="300" y="200" height="50" width="50" fill="#ff0000" onmouseover="move_Square()"></rect>
+</svg>>
+
+</body>
+
+</html>

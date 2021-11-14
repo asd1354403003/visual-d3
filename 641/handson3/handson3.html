@@ -1,0 +1,49 @@
+<html>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/simple-statistics@7.7.0/dist/simple-statistics.min.js"></script>
+<script src="handson3.js"></script>
+
+<script src="https://unpkg.com/d3-v6-tip@1.0.6/build/d3-v6-tip.js"></script>
+<link rel="stylesheet" type="text/css" href="http://ils.unc.edu/~gotz/courses/js/d3-tip.css"/>
+
+
+<style>
+.wait {
+	fill: red;
+}
+.meet {
+	fill: green;
+}
+.selected {
+	stroke-width: 2px;
+	stroke: black;
+}
+</style>
+<body>
+Sort by:
+<select id="sort_select" onchange="meeting_vis.setSortMode(this.value);">
+	<option value="appointment">Appointment</option>
+	<option value="start">Start</option>
+	<option value="end">End</option>
+	<option value="total">Total Time</option>
+</select>
+Show:
+<select id="show_select" onchange="meeting_vis.setShowMode(this.value);">
+	<option value="all">All</option>
+	<option value="no_wait">No Wait</option>
+	<option value="any_wait">Any Wait</option>
+	<option value="majority_wait">Majority Wait</option>
+</select>
+
+<br/>
+<!-- This is where we'll draw the visualization! -->
+<svg id="vis_canvas" style="height:600px; width:800px; border: 1px solid black;"></svg>
+<!-- This is where we'll display details about a selected meeting! -->
+<div id="details"></div>
+<script>
+// Create a new MeetingVis object (class defined in meetings.js) and tell it to render.
+meeting_vis = new MeetingVis("vis_canvas", meeting_data);
+meeting_vis.render();
+</script>
+</body>
+</html>

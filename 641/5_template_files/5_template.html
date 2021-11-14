@@ -1,0 +1,49 @@
+
+<!-- saved from url=(0067)https://ils.unc.edu/courses/2021_fall/inls641_001/a/5_template.html -->
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><style>
+	.rainbow div {
+		font: 10px sans-serif;
+		text-align: left;
+		width: 200px;
+		height: 20px;
+	}
+</style>
+<script src="d3.v7.min.js" charset="utf-8"></script>
+</head>
+
+
+
+
+<body>
+	<p>The colors of the rainbow spell
+	<a href="http://en.wikipedia.org/wiki/Roy_G._Biv">ROY G. BIV!</a></p>
+
+	<div class="rainbow">
+	</div>
+
+	<script>
+		var colors = [ "Red", "Orange", "Yellow", "Green",
+			"Blue", "Indigo", "Violet" ];
+
+		// Replace this comment with D3 code that will populate the
+		// "rainbow" div with 7 additional DIV elements, each with
+		// a background color determined by the values in the "colors"
+		// array.
+		//
+		// For some hints, look carefully at the "Let's Make A Bar
+		// Chart" example available online at the following URL:
+		// http://bost.ocks.org/mike/bar/
+
+		d3.select(".rainbow")
+				.selectAll("div")
+				.data(colors)
+				.enter().append("div")
+				.style('background-color', function(d,i) {return colors[i]; })
+				.text(function(d) {return d; });
+
+	</script>
+
+
+<div id="is-examityscreenshare-installed"></div></body></html>

@@ -1,0 +1,360 @@
+<html>
+<head>
+    <title>Assignment #6</title>
+    <script src="https://d3js.org/d3.v7.min.js" charset="utf-8"></script>
+    <script src="https://unpkg.com/simple-statistics@7.7.0/dist/simple-statistics.min.js"></script>
+    <script src="https://ils.unc.edu/~gotz/courses/js/p_value.js"></script>
+
+    <style>
+        /* Style information for axis labels */
+        .axis-label {
+            font-family: sans-serif;
+            font-size: 12px;
+        }
+
+        /* Style information for axis lines and tick marks */
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+
+
+
+    </style>
+</head>
+<body>
+<!--
+Select control to set the region to be visualized.  Note that the javascript callback
+named "scatterplot.render(...)" is triggered each time the value for this select control
+changes.
+-->
+<p>Select a geographic region:
+    <select onchange="scatterplot.render(this.options[this.selectedIndex].value);">
+        <option value="us">United States</option>
+        <option value="Midwest">Midwest</option>
+        <option value="Northeast">Northeast</option>
+        <option value="Other">Other</option>
+        <option value="South">South</option>
+        <option value="West">West</option>
+    </select>
+</p>
+
+<!--
+This span can be used to show "details on demand" when a circle in the scatterplot is moused over.
+-->
+<span id="details">&nbsp;</span>
+<p> </p>
+
+<span id="correlation">&nbsp;</span>
+
+
+<!--
+This is the container in which D3 will draw the scatter plot.
+-->
+<div id="vis_container">
+</div>
+
+<p>The data used in this exercise was retrieved on July 23, 2013 from the Henry J. Kaiser Family Foundation's 2011 study on State Health Facts (http://kff.org/statedata/).</p>
+<!--
+Finally, here comes the actual Javascript code.
+-->
+<script>
+    // Life expectancy, poverty rate, and region for all 50 United States.  Data
+    // is also provided for the District of Columbia.  We therefore have 51 items
+    // in the data array.
+    let data = [
+        {state:"Alabama",life_expectancy:75.4,poverty_rate:22,region:"South"},
+        {state:"Alaska",life_expectancy:78.3,poverty_rate:21,region:"Other"},
+        {state:"Arizona",life_expectancy:79.6,poverty_rate:23,region:"West"},
+        {state:"Arkansas",life_expectancy:76,poverty_rate:22,region:"South"},
+        {state:"California",life_expectancy:80.8,poverty_rate:24,region:"West"},
+        {state:"Colorado",life_expectancy:80,poverty_rate:16,region:"West"},
+        {state:"Connecticut",life_expectancy:80.8,poverty_rate:14,region:"Northeast"},
+        {state:"Delaware",life_expectancy:78.4,poverty_rate:17,region:"Northeast"},
+        {state:"District of Columbia",life_expectancy:76.5,poverty_rate:25,region:"South"},
+        {state:"Florida",life_expectancy:79.4,poverty_rate:20,region:"South"},
+        {state:"Georgia",life_expectancy:77.2,poverty_rate:23,region:"South"},
+        {state:"Hawaii",life_expectancy:81.3,poverty_rate:24,region:"Other"},
+        {state:"Idaho",life_expectancy:79.5,poverty_rate:19,region:"West"},
+        {state:"Illinois",life_expectancy:79,poverty_rate:19,region:"Midwest"},
+        {state:"Indiana",life_expectancy:77.6,poverty_rate:20,region:"Midwest"},
+        {state:"Iowa",life_expectancy:79.7,poverty_rate:14,region:"Midwest"},
+        {state:"Kansas",life_expectancy:78.7,poverty_rate:17,region:"Midwest"},
+        {state:"Kentucky",life_expectancy:76,poverty_rate:22,region:"South"},
+        {state:"Louisiana",life_expectancy:75.7,poverty_rate:27,region:"South"},
+        {state:"Maine",life_expectancy:79.2,poverty_rate:16,region:"Northeast"},
+        {state:"Maryland",life_expectancy:78.8,poverty_rate:16,region:"Northeast"},
+        {state:"Massachusetts",life_expectancy:80.5,poverty_rate:15,region:"Northeast"},
+        {state:"Michigan",life_expectancy:78.2,poverty_rate:20,region:"Midwest"},
+        {state:"Minnesota",life_expectancy:81.1,poverty_rate:13,region:"Midwest"},
+        {state:"Mississippi",life_expectancy:75,poverty_rate:25,region:"South"},
+        {state:"Missouri",life_expectancy:77.5,poverty_rate:19,region:"Midwest"},
+        {state:"Montana",life_expectancy:78.5,poverty_rate:19,region:"West"},
+        {state:"Nebraska",life_expectancy:79.8,poverty_rate:14,region:"Midwest"},
+        {state:"Nevada",life_expectancy:78.1,poverty_rate:21,region:"West"},
+        {state:"New Hampshire",life_expectancy:80.3,poverty_rate:10,region:"Northeast"},
+        {state:"New Jersey",life_expectancy:80.3,poverty_rate:17,region:"Northeast"},
+        {state:"New Mexico",life_expectancy:78.4,poverty_rate:27,region:"West"},
+        {state:"New York",life_expectancy:80.5,poverty_rate:22,region:"Northeast"},
+        {state:"North Carolina",life_expectancy:77.8,poverty_rate:21,region:"South"},
+        {state:"North Dakota",life_expectancy:79.5,poverty_rate:14,region:"Midwest"},
+        {state:"Ohio",life_expectancy:77.8,poverty_rate:20,region:"Midwest"},
+        {state:"Oklahoma",life_expectancy:75.9,poverty_rate:19,region:"South"},
+        {state:"Oregon",life_expectancy:79.5,poverty_rate:19,region:"West"},
+        {state:"Pennsylvania",life_expectancy:78.5,poverty_rate:17,region:"Northeast"},
+        {state:"Rhode Island",life_expectancy:79.9,poverty_rate:18,region:"Northeast"},
+        {state:"South Carolina",life_expectancy:77,poverty_rate:24,region:"South"},
+        {state:"South Dakota",life_expectancy:79.5,poverty_rate:17,region:"Midwest"},
+        {state:"Tennessee",life_expectancy:76.3,poverty_rate:21,region:"South"},
+        {state:"Texas",life_expectancy:78.5,poverty_rate:23,region:"South"},
+        {state:"Utah",life_expectancy:80.2,poverty_rate:16,region:"West"},
+        {state:"Vermont",life_expectancy:80.5,poverty_rate:14,region:"Northeast"},
+        {state:"Virginia",life_expectancy:79,poverty_rate:16,region:"South"},
+        {state:"Washington",life_expectancy:79.9,poverty_rate:16,region:"West"},
+        {state:"West Virginia",life_expectancy:75.4,poverty_rate:21,region:"South"},
+        {state:"Wisconsin",life_expectancy:80,poverty_rate:15,region:"Midwest"},
+        {state:"Wyoming",life_expectancy:78.3,poverty_rate:14,region:"West"}
+    ];
+
+    former_points = null
+
+    class Scatterplot {
+        constructor(container_id) {
+            this.container_id = container_id;
+
+            // These variables are used to define size of the visualization canvas and the
+            // margin (or "padding") around the scattter plot.  We use the margin to draw
+            // things like axis labels.
+            this.height = 500;
+            this.width = 500;
+            this.margin = 40;
+
+            // Create the SVG canvas that will be used to render the visualization.
+            this.svg = d3.select("#"+container_id)
+                .append("svg")
+                .attr("width", this.width)
+                .attr("height", this.height);
+
+            // Define a variety of scales, for color, x axis and y axis.
+            // Poverty rates are all below 30 percent.
+            this.x = d3.scaleLinear()
+                .domain([0,30])
+                .range([this.margin,this.width-this.margin]);
+
+            // Life expectancy values all fall between 70 and 90.
+            this.y = d3.scaleLinear()
+                .domain([90,70])
+
+                .range([this.margin,this.height-this.margin]);
+
+            // There are 4 regions in the continental US, plus "Other" for
+            // Hawaii and Alaska.
+            this.region_color = d3.scaleOrdinal(d3.schemeCategory10);
+
+            // Add axes.  First the X axis and label.
+            this.svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0,"+(500-this.margin)+")")
+                .call(d3.axisBottom(this.x));
+
+            this.svg.append("text")
+                .attr("class", "axis-label")
+                .attr("y", 495)
+                .attr("x",0 + (500 / 2))
+                .style("text-anchor", "middle")
+                .text("Poverty Rate");
+
+            // Now the Y axis and label.
+            this.svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate("+this.margin+",0)")
+                .call(d3.axisLeft(this.y))
+
+            this.svg.append("text")
+                .attr("transform", "rotate(90)")
+                .attr("class", "axis-label")
+                .attr("y", -5)
+                .attr("x",0 + (500 / 2))
+                .style("text-anchor", "middle")
+                .text("Life Expectancy");
+
+
+            this.svg.append("clipPath")
+                .attr("id", "clip")
+                .append("rect")
+                .attr("x", this.margin)
+                .attr("y", this.margin)
+                .attr("width", this.width-2*this.margin)
+                .attr("height", this.height-2*this.margin);
+
+        }
+
+        // Next, we define the render callback.  This is used when the page first loads
+        // to draw data for the entire US.  It is also called whenever the select control
+        // is changed (e.g., to show only the South or only the Northeast).
+        //
+        // The _subset parameter will have one of six possible values: 'us', 'northeast',
+        // 'south', 'west', 'midwest', or 'other'.
+
+
+
+
+        render(_subset) {
+            let thisvis = this;
+
+            // THIS IS WHERE YOU NEED TO ADD YOUR CODE TO COMPLETE THIS ASSIGNMENT!
+            let data_subset = data;
+            if (_subset != "us") {
+                data_subset = data.filter(function(d) {return (d.region == _subset); });
+            }
+
+            // Update the correlation score now that we have the requested data subset.
+            this.updateCorrelation(data_subset,_subset);
+
+
+
+
+
+
+            // Compute and render the regression line.
+            // INLS641: You should add code here.
+
+            let x = this.x
+            let y = this.y
+
+
+            let point_for_regr = data_subset.map(function(d) {
+                //console.log(y(d.life_expectancy))
+                return [x(d.poverty_rate), y(d.life_expectancy)];});
+
+            //console.log(point_for_regr)
+
+
+            let lin_regr_line = ss.linearRegressionLine(ss.linearRegression(point_for_regr))
+
+
+
+            let first_x = x(0);
+            let last_x = x(30);
+            let x_coordinates = [first_x, last_x];
+            let regr_points = x_coordinates.map(function(d) {
+                return {x: d, y: lin_regr_line(d)};});
+
+
+
+
+            let svg = this.svg;
+
+
+
+
+            if (former_points) {
+                console.log('222222222222')
+
+
+                d3.selectAll(".regression")
+                    .transition().duration(1000).attr("transform")
+                    .attr("class", "regression")
+                    .attr("clip-path", "url(#clip)")
+                    .attr("x1", regr_points[0].x)
+                    .attr("y1", regr_points[0].y)
+                    .attr("x2", regr_points[1].x)
+                    .attr("y2", regr_points[1].y)
+            }
+            else{
+
+                console.log('111111111111')
+
+
+                svg.append("line")
+                    .attr("class", "regression")
+                    .attr("clip-path", "url(#clip)")
+                    .attr("x1", regr_points[0].x)
+                    .attr("y1", regr_points[0].y)
+                    .attr("x2", regr_points[1].x)
+                    .attr("y2", regr_points[1].y)
+                    .attr("stroke", "purple")
+                    .attr("stroke-width", 2)
+                    .style("stroke-dasharray", ("10, 5"));
+
+                former_points = 1
+            }
+
+
+
+
+
+
+
+
+
+                // Render the scatterplot.
+            let circles = this.svg.selectAll("circle").data(data_subset, function(d) {return d.state;});
+
+            circles.exit()
+                .transition()
+                .duration(250)
+                .attr("r",0)
+                .remove();
+
+            circles.enter().append("circle")
+                .attr("r", 0)
+                .attr("cx", function(d) { return thisvis.x(d.poverty_rate); })
+                .attr("cy", function(d) { return thisvis.y(d.life_expectancy); })
+                .style("fill", function(d) { return thisvis.region_color(d.region); })
+                .on("mouseover", function(){
+                    document.getElementById("details").innerHTML = this.__data__.state + " has a life expectancy of " +
+                        this.__data__.life_expectancy + " and a poverty rate of " +
+                        this.__data__.poverty_rate + "%.";
+                })
+                .on("mouseout", function(){ document.getElementById("details").innerHTML = "&nbsp;"; })
+                    // Animate the radius to have the circles slowly grow to full size.
+                    .transition()
+                    .duration(750)
+                    .attr("r",5)
+                // Finally, go back to the enter selection (the circles to which we just added a transition) to
+                // add an svg:title for mouse hovers.
+                .selection().append("svg:title")
+                .text(function(d) { return d.state; });
+
+            // Note: we don't need to deal with the update selection.  WHY?
+        }
+
+        // Update the correlation score based on the selected subset.
+        updateCorrelation(data_subset, _region) {
+            // INLS641: You should add code here.
+
+
+            let life_expectancy = data_subset.map(function(d) {return d.life_expectancy;});
+            let poverty_rate = data_subset.map(function(d) {return d.poverty_rate;});
+            console.log(life_expectancy);
+            console.log(poverty_rate);
+
+            let corr_div = document.getElementById("correlation");
+
+            if (_region == "Other") {
+                _region = "states of Hawaii and Alaska"
+            }
+
+            let corr_html = "In the "+_region+", life expectancy and poverty rate have a correlation score of "+ss.sampleCorrelation(life_expectancy, poverty_rate).toFixed(2)+".";
+            console.log(corr_html);
+
+            corr_div.innerHTML = corr_html;
+        }
+    }
+
+    // Finally, create the scatterplot and initialize it to show all of the 'us' data (the default setting for the
+    // select dropdown).
+    let scatterplot = new Scatterplot("vis_container");
+    scatterplot.render("us");
+
+</script>
+</body>
+</html>
